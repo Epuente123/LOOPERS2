@@ -17,18 +17,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         $precio = $_POST['precio'];
         $anio = $_POST['anio'];
  
-        $foto = '';
-        if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
-            $nombreArchivo = time() . '_' . basename($_FILES['foto']['name']);
-           
-            // CORRECCIÓN: Añadida la barra '/' después de imgs para que la ruta sea válida
-            $rutaDestino = 'imgs/' . $nombreArchivo;
-           
-            if (move_uploaded_file($_FILES['foto']['tmp_name'], $rutaDestino)) {
-                // CORRECCIÓN: Guardamos la ruta con la barra '/' para que el HTML la encuentre
-                $foto = 'imgs/' . $nombreArchivo;
-            }
-        }
+$foto = '';
+if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
+
+    // Ruta correcta hacia la carpeta imgs del frontend
+    $carpetaImagenes = __DIR__ . '/../frontend/imgs';
+
+    // Crear la carpeta si no existe
+    if (!is_dir($carpetaImagenes)) {
+        mkdir($carpetaImagenes, 0777, true);
+    }
+
+    $nombreArchivo = time() . '_' . basename($_FILES['foto']['name']);
+
+    // Ruta física donde se guardará la imagen
+    $rutaDestino = $carpetaImagenes . '/' . $nombreArchivo;
+
+    if (move_uploaded_file($_FILES['foto']['tmp_name'], $rutaDestino)) {
+        // Ruta que se guardará en la base de datos y usará el HTML
+        $foto = 'imgs/' . $nombreArchivo;
+    }
+}
+
  
         // Usamos sentencias preparadas o escapamos datos para evitar errores de SQL
         $autor = $conexion->real_escape_string($autor);
