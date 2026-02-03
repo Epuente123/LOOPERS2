@@ -159,7 +159,7 @@ $resultado = $conexion->query($sql);
 <div class="container pb-5">
     <div class="header-section text-center">
         <div class="d-flex justify-content-between align-items-center mb-5">
-            <a href="../frontend/index.html" class="text-secondary text-decoration-none small fw-bold" style="letter-spacing:2px">
+            <a href="https://loopers-2.vercel.app/index.html" class="text-secondary text-decoration-none small fw-bold" style="letter-spacing:2px">
                 <i class="fas fa-long-arrow-alt-left me-2"></i> VOLVER
             </a>
             
