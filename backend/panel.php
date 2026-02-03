@@ -1,50 +1,50 @@
 <?php
 session_start();
 require "conexion.php";
-
+ 
 if (!isset($_SESSION['usuario'])) {
     header("Location: ../frontend/index.html");
     exit();
 }
-
+ 
 // --- ACCIONES POST ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
-
+ 
     if ($_POST['accion'] == 'añadir') {
         $autor = $_POST['autor'];
         $nombre = $_POST['nombre'];
         $descripcion = $_POST['descripcion'];
         $precio = $_POST['precio'];
         $anio = $_POST['anio'];
-
+ 
         $foto = '';
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
             $nombreArchivo = time() . '_' . basename($_FILES['foto']['name']);
-            
+           
             // CORRECCIÓN: Añadida la barra '/' después de imgs para que la ruta sea válida
-            $rutaDestino = '../frontend/imgs/' . $nombreArchivo; 
-            
+            $rutaDestino = 'imgs/' . $nombreArchivo;
+           
             if (move_uploaded_file($_FILES['foto']['tmp_name'], $rutaDestino)) {
                 // CORRECCIÓN: Guardamos la ruta con la barra '/' para que el HTML la encuentre
-                $foto = '../frontend/imgs/' . $nombreArchivo;
+                $foto = 'imgs/' . $nombreArchivo;
             }
         }
-
+ 
         // Usamos sentencias preparadas o escapamos datos para evitar errores de SQL
         $autor = $conexion->real_escape_string($autor);
         $nombre = $conexion->real_escape_string($nombre);
         $descripcion = $conexion->real_escape_string($descripcion);
-
-        $sql = "INSERT INTO vinilos (autor, nombre, descripcion, precio, anio, foto) 
+ 
+        $sql = "INSERT INTO vinilos (autor, nombre, descripcion, precio, anio, foto)
                 VALUES ('$autor', '$nombre', '$descripcion', '$precio', '$anio', '$foto')";
         $conexion->query($sql);
     }
-
+ 
     if ($_POST['accion'] == 'borrar' && isset($_POST['id'])) {
         $id = intval($_POST['id']);
         $conexion->query("DELETE FROM vinilos WHERE id = $id");
     }
-
+ 
     if ($_POST['accion'] == 'toggle' && isset($_POST['id'])) {
         $id = intval($_POST['id']);
         $resultado = $conexion->query("SELECT visible FROM vinilos WHERE id = $id");
@@ -52,11 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         $nuevoEstado = $row['visible'] ? 0 : 1;
         $conexion->query("UPDATE vinilos SET visible = $nuevoEstado WHERE id = $id");
     }
-
+ 
     header("Location: panel.php");
     exit();
 }
-
+ 
 // --- BÚSQUEDA ---
 $buscar = '';
 if (isset($_GET['buscar'])) {
@@ -67,7 +67,7 @@ if (isset($_GET['buscar'])) {
 }
 $result_vinilos = $conexion->query($sql_vinilos);
 ?>
-
+ 
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -110,7 +110,7 @@ $result_vinilos = $conexion->query($sql_vinilos);
     </style>
 </head>
 <body class="p-4">
-
+ 
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Panel de Control</h1>
@@ -119,9 +119,9 @@ $result_vinilos = $conexion->query($sql_vinilos);
             <a href="logout.php" class="btn btn-outline-danger">Cerrar Sesión</a>
         </div>
     </div>
-
+ 
     <hr class="border-warning mb-5">
-
+ 
     <div class="card bg-dark text-white p-4 mb-5 border-warning">
         <h2 class="h4 mb-4">Añadir Nuevo Vinilo</h2>
         <form method="post" enctype="multipart/form-data" class="row g-3">
@@ -155,35 +155,35 @@ $result_vinilos = $conexion->query($sql_vinilos);
             </div>
         </form>
     </div>
-
+ 
     <form method="get" class="mb-5">
         <div class="input-group">
             <input type="text" name="buscar" class="form-control form-control-lg" placeholder="Buscar por nombre o artista..." value="<?php echo htmlspecialchars($buscar); ?>">
             <button class="btn btn-primary" type="submit">Buscar</button>
         </div>
     </form>
-
+ 
     <div class="row">
         <?php if ($result_vinilos->num_rows > 0): ?>
             <?php while ($vinilo = $result_vinilos->fetch_assoc()): ?>
             <div class="col-sm-6 col-lg-3 mb-4">
                 <div class="card-vinilo">
-                    <?php 
+                    <?php
                         // Verificamos si la imagen existe físicamente
-                        $rutaImagen = $vinilo['foto'] ? $vinilo['foto'] : '../frontend/imgs/default_album.png';
+                        $rutaImagen = $vinilo['foto'] ? $vinilo['foto'] : 'imgs/default_album.png';
                     ?>
                     <img src="<?php echo $rutaImagen; ?>" alt="Portada">
-                    
+                   
                     <h5 class="text-warning mb-1"><?php echo htmlspecialchars($vinilo['nombre']); ?></h5>
                     <p class="small text-secondary mb-2"><?php echo htmlspecialchars($vinilo['autor']); ?></p>
                     <p class="fw-bold fs-5 mb-2"><?php echo number_format($vinilo['precio'], 2); ?> €</p>
-                    
+                   
                     <div class="mb-3">
                         <span class="badge badge-visible <?php echo $vinilo['visible'] ? 'bg-success' : 'bg-danger'; ?>">
                             <?php echo $vinilo['visible'] ? 'Visible' : 'Oculto'; ?>
                         </span>
                     </div>
-
+ 
                     <div class="d-flex justify-content-center gap-2">
                         <form method="post">
                             <input type="hidden" name="accion" value="toggle">
@@ -208,6 +208,6 @@ $result_vinilos = $conexion->query($sql_vinilos);
         <?php endif; ?>
     </div>
 </div>
-
+ 
 </body>
 </html>
